@@ -1,3 +1,4 @@
+from ast import literal_eval
 import codecs
 import logging
 import os
@@ -441,7 +442,7 @@ class Parser(object):
         for i in xrange(len(params)):
             param = params[i]
             if param[0] == '#':
-                params[i] = colors.HexColor(eval('0x' + param[1:]))
+                params[i] = colors.HexColor(int('0x' + param[1:], 0))
             elif param[-1] == 'u':
                 params[i] = float(param[:-1])*self.unit
             else:
@@ -463,7 +464,7 @@ class Parser(object):
             else:
                 source_name = None
 
-            def_dict = eval(definition)
+            def_dict = literal_eval(definition)
             new_dict = {}
             for k in def_dict.keys():
                 v = def_dict[k]
@@ -473,7 +474,7 @@ class Parser(object):
                 if nk == 'fontSize' or nk == 'leading':
                     v = toLength(v)
                 elif nk == 'color':
-                    v = colors.HexColor(eval('0x' + v[1:]))
+                    v = colors.HexColor(int('0x' + v[1:], 0))
                 new_dict[nk] = v
 
             if 'leading' not in new_dict and 'fontSize' in new_dict:
@@ -591,6 +592,28 @@ class XmlParser(object):
             for i in self.parse_element(c):
                 yield i
 
+    PAGE_SIZES_MAPPING = {
+        'A0': pagesizes.A0,
+        'A1': pagesizes.A1,
+        'A2': pagesizes.A2,
+        'A3': pagesizes.A3,
+        'A4': pagesizes.A4,
+        'A5': pagesizes.A5,
+        'A6': pagesizes.A6,
+
+        'B0': pagesizes.B0,
+        'B1': pagesizes.B1,
+        'B2': pagesizes.B2,
+        'B3': pagesizes.B3,
+        'B4': pagesizes.B4,
+        'B5': pagesizes.B5,
+        'B6': pagesizes.B6,
+
+        'LETTER': pagesizes.LETTER,
+        'LEGAL': pagesizes.LEGAL,
+        'ELEVENSEVENTEEN': pagesizes.ELEVENSEVENTEEN,
+    }
+
     def doc(self, e):
         format = e.get('format', 'A4')
         raw_margins = e.get('margin', '2cm, 2cm, 2cm, 2cm')
@@ -600,7 +623,7 @@ class XmlParser(object):
             w, h = (toLength(i.strip()) for i in format.split(','))
             format = (w, h)
         else:
-            format = eval('pagesizes.' + format.upper())
+            format = self.PAGE_SIZES_MAPPING.get(format.upper(), pagesizes.A4)
 
         topMargin, rightMargin, bottomMargin, leftMargin = (toLength(i.strip()) for i in raw_margins.split(','))
 
@@ -640,7 +663,7 @@ class XmlParser(object):
             if nk == 'fontSize' or nk == 'leading':
                 v = toLength(v)
             elif nk == 'color':
-                v = colors.HexColor(eval('0x' + v[1:]))
+                v = colors.HexColor(int('0x' + v[1:], 0))
             new_dict[nk] = v
 
         if 'leading' not in new_dict and 'fontSize' in new_dict:
@@ -736,7 +759,7 @@ class XmlParser(object):
             for i in xrange(len(params)):
                 param = params[i].strip()
                 if param[0] == '#':
-                    params[i] = colors.HexColor(eval('0x' + param[1:]))
+                    params[i] = colors.HexColor(int('0x' + param[1:], 0))
                 else:
                     try:
                         floatval = toLength(param)
