@@ -2,7 +2,7 @@ from ast import literal_eval
 import codecs
 import logging
 import os
-from cStringIO import StringIO
+from io import StringIO, BytesIO
 import reportlab
 from reportlab.lib import pagesizes, colors
 from reportlab.lib.units import cm, inch, mm, toLength
@@ -21,7 +21,7 @@ from reportlab.platypus.flowables import Flowable, XBox
 from svglib.svglib import svg2rlg
 from svglib.svglib import SvgRenderer
 
-from flowables import TextField, BackgroundImage
+from pdfgen.flowables import TextField, BackgroundImage
 
 import xml.dom.minidom
 
@@ -524,7 +524,7 @@ class XmlParser(object):
 
     def __init__(self):
         self.styles = getSampleStyleSheet()
-        self.out_buffer = StringIO()
+        self.out_buffer = BytesIO()
         self.style_stack = []
         self.media_url = getattr(settings, 'MEDIA_URL', '')
         self.static_url = getattr(settings, 'STATIC_URL', '')
@@ -569,7 +569,7 @@ class XmlParser(object):
         return self.merge_parts(parts)
 
     def parse_parts(self, buffer):
-        xdoc = etree.fromstring(buffer.encode('utf-8'))
+        xdoc = etree.fromstring(buffer)
         return list(self.parse_element(xdoc))
 
     def parse_element(self, e):

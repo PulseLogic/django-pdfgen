@@ -16,7 +16,7 @@ except ImportError:
     # Use old version as fallback
     USE_PYPDF2 = False
 
-import StringIO
+from io import StringIO
 
 
 def get_parser(template_name):
