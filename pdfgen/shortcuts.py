@@ -57,7 +57,7 @@ def render_to_pdf_download(template_name, context, context_instance=None, filena
     if filename:
         response['Content-Disposition'] = u'attachment; filename=%s' % filename
 
-    input = render_to_string(template_name, context, context_instance)
+    input = render_to_string(template_name, context)
 
     parser = get_parser(template_name)
     output = parser.parse(input)
