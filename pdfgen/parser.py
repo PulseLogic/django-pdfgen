@@ -79,6 +79,13 @@ CSS_DICT = {
     'justify': TA_JUSTIFY,
 }
 
+try:
+    # Python 2 forward-compatibility check
+    xrange
+except NameError:
+    # in Python 3, xrange is now name range
+    xrange = range
+
 
 def _new_draw(self):
     self.canv.setLineWidth(0.2*mm)
