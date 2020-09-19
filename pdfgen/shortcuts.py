@@ -2,7 +2,6 @@ from reportlab.platypus.flowables import PageBreak
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.template.context import Context
 from django.template.loader import render_to_string
 from django.utils import translation
 
@@ -98,8 +97,6 @@ def multiple_contexts_to_pdf_data(template_name, contexts, context_instance=None
 
 
 def multiple_contexts_and_templates_to_pdf_data(contexts_templates, context_instance=None, filename=None):
-    context_instance = context_instance or Context()
-
     if USE_PYPDF2:
         merger = PdfFileMerger()
     else:
