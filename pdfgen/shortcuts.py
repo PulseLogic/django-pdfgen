@@ -49,8 +49,6 @@ def render_to_pdf_download(template_name, context, context_instance=None, filena
     """
     Parse the template into a download
     """
-    context_instance = context_instance or Context()
-
     response = HttpResponse()
     response['Content-Type'] = 'application/pdf'
     if filename:
