@@ -110,6 +110,8 @@ class XmlParser(object):
     #: the Django STATIC_URL
     static_url = ''
     background = None
+    footer_flowable = None
+    footer_on_first_page = False
 
     def __init__(self):
         self.styles = getSampleStyleSheet()
@@ -137,7 +139,7 @@ class XmlParser(object):
         if self.background:
             self.background.draw(canvas, doc)
 
-        # # Header
+        # Header
         # header = Paragraph('This is a multi-line header.  It goes on every page.   ' * 5, self.styles['Normal'])
         # w, h = header.wrap(doc.width, doc.topMargin)
         # header.drawOn(canvas, doc.leftMargin, doc.height + doc.topMargin - h)
@@ -146,16 +148,31 @@ class XmlParser(object):
 
     def handle_first_page(self, canvas, doc):
         self.set_background_image(canvas, doc)
+        if self.footer_on_first_page:
+            self.draw_footer(canvas, doc)
 
     def handle_later_pages(self, canvas, doc):
         self.set_background_image(canvas, doc)
+        self.draw_footer(canvas, doc)
+
+    def draw_footer(self, canvas, doc):
+        print('-' * 80)
+        print('Trying to draw footer...', repr(self.footer_flowable))
+
+        if self.footer_flowable is None:
+            return
+        canvas.saveState()
+        w, h = self.footer_flowable.wrap(doc.width, doc.bottomMargin)
+        self.footer_flowable.drawOn(canvas, doc.leftMargin, doc.bottomMargin - h)
+        canvas.restoreState()
 
     def merge_parts(self, parts):
         if self.document is not None:
             self.document.build(
                 parts,
-                onFirstPage=self.set_background_image,
-                onLaterPages=self.set_background_image)
+                onFirstPage=self.handle_first_page,
+                onLaterPages=self.handle_later_pages
+            )
             output_data = self.out_buffer.getvalue()
             self.out_buffer.close()
 
@@ -395,6 +412,12 @@ class XmlParser(object):
 
     def pagemarker(self, e):  # noqa
         yield PageMarker(name=e.get('name'), description=content(e))
+
+    def footer(self, e):
+        self.footer_flowable = list(self.parse_children(e))[0]
+        self.footer_on_first_page = e.get('firstpage', 'false').lower() in ('true', '1')
+        if False:
+            yield  # noqa
 
     def spacer(self, e):  # noqa
         width = toLength(e.get('width', '1pt'))
