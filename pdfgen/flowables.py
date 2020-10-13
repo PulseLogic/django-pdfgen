@@ -1,7 +1,32 @@
-from reportlab.lib.units import inch
+from collections import defaultdict
+
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch, cm
 from reportlab.pdfbase.pdfform import textFieldRelative
 from reportlab.platypus.flowables import Flowable
-from reportlab.platypus import Image
+from reportlab.platypus import Image, Paragraph
+
+
+class PageMarker(Flowable):
+    def __init__(self, name, description):
+        print(80 * '*')
+        print(repr(description))
+        self.name = name
+        self.description = description
+
+    def wrap(self, availWidth, availHeight):
+        return Paragraph('test', getSampleStyleSheet()['Normal']).wrap(availWidth, availHeight)
+
+    def draw(self):
+        if not hasattr(self.canv, '_pdfgen_page_count'):
+            self.canv._pdfgen_page_count = {}
+
+        self.canv._pdfgen_page_count.setdefault(self.name, self.canv.getPageNumber())
+        page = self.canv.getPageNumber() - self.canv._pdfgen_page_count[self.name] + 1
+        formatted_description = self.description.format(page=page)
+        p = Paragraph(formatted_description, getSampleStyleSheet()['Normal'])
+        p.wrap(15 * cm, 1 * cm)
+        p.drawOn(self.canv, 0 * cm, 0 * cm)
 
 
 class TextField(Flowable):
